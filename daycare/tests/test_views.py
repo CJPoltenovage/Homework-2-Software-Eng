@@ -23,3 +23,13 @@ def test_feed_endpoint_changes_puff_and_redirects(client):
     puff.refresh_from_db()
     assert response.status_code == 302
     assert puff.hunger == 4
+
+
+@pytest.mark.django_db
+def test_home_page_hungry_and_exhausted_currently_shows_snack(client):
+    Dragon.objects.create(name="Puff", hunger=7, energy=1, mood="content")
+
+    response = client.get(reverse("home"))
+
+    assert response.context["banner"] == "Puff may need a snack soon."
+    assert response.context["status"] == "Puff could use a snack."
