@@ -13,4 +13,54 @@ One design problem is that the feeding and rest check rules are written in a bun
 
 
 
-<!-- My plan is to define all of the care rules once at the top of models.py, outside of the Dragon class. This will cover when Puff is very hungry, needs a snack, or is exhausted, along with small functions that check those values to make sure updates to the mood and recommendation are made as needed. Then feed(), status_message(), needs_attention(), and the banner in home() will all use these instead of their own numbers, so the view will stop making its own care decisions. During the refactor I will keep every check in its current order so the app behaves exactly the same. I will add one function that returns the Care Board recommendation in the right priority order as well, and have the banner and status_message() use it so they always match the Care Board. That way, any future change to a number or to the priority only has to be made in one place. -->
+<!-- Proposed Structural Changea
+My plan is to define all of the care rules once at the top of models.py, outside of the Dragon class. This will cover when Puff is very hungry, needs a snack, or is exhausted, along with small functions that check those values to make sure updates to the mood and recommendation are made as needed. Then feed(), status_message(), needs_attention(), and the banner in home() will all use these instead of their own numbers, so the view will stop making its own care decisions. During the refactor I will keep every check in its current order so the app behaves exactly the same. I will add one function that returns the Care Board recommendation in the right priority order as well, and have the banner and status_message() use it so they always match the Care Board. That way, any future change to a number or to the priority only has to be made in one place. -->
+
+
+
+<!-- Part 5 -->
+
+
+<!-- What did you change structurally?:
+What I changed structurally is that  I moved the hunger and energy numbers into named constants at the top of models.py and added three functions, is_starving, is_snacking_hungry, and is_exhausted, to check them. Then I updated feed(), status_message(), needs_attention(), and the banner in views.py to use these instead of their own numbers. For the feature I added care_recommendation(), which returns the first rule that matches in priority order, and now the banner and status_message()
+both use it, so the view no longer makes its own care decisions.
+
+
+
+What did you change behaviorally?:
+
+The home page now shows a Care Board with one recommendation: FEED NOW, REST,
+OFFER SNACK, or ALL CLEAR. The only old behavior that changed is when Puff's
+hunger is 6 or 7 and his energy is 2 or lower. Before, the banner and status
+message said he needed a snack, but now they say he needs rest so they match the
+Care Board. Everything else, including feeding, works the same as before.
+
+
+
+
+What evidence gives you confidence that existing behavior was preserved?:
+
+The evidencse that gives me confidence that existing behavior was preserved is
+that all of the baseline tests, along with my added characterization tests,
+passed after the refactor without me changing them. The only test I changed was
+the hungry and exhausted one, which I updated on purpose becuase the stakeholder
+wanted REST to win over OFFER SNACK. I also added tests for the new functions
+and the Care Board, and all of those tests passed ensuring that the behavior that those tests depended on also functioned as intended.
+
+
+
+
+How would the NEXT similar change be easier because of your design?:
+
+If the daycare wanted to change a value, such as increasing the snacking threshold by one, it only has to be chnaged in one place now instead of four. This makes it far easier to add code or change functionalities without breaking any existing behavior or causing code contradictions.
+
+
+
+
+What is one design tradeoff or limitation you chose not to address?:
+
+One limitation I chose not to address is that the needs_attention function
+doesn't use the Care Board recommendation. It still relies on the same shared
+functions, so its numbers will always match, but if the
+priority rules are changed in the future, someone would need to remember to check
+needs_attention to make sure it still works as intended.

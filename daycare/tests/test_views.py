@@ -26,10 +26,12 @@ def test_feed_endpoint_changes_puff_and_redirects(client):
 
 
 @pytest.mark.django_db
-def test_home_page_hungry_and_exhausted_currently_shows_snack(client):
+def test_home_page_hungry_and_exhausted_recommends_rest(client):
     Dragon.objects.create(name="Puff", hunger=7, energy=1, mood="content")
 
     response = client.get(reverse("home"))
 
-    assert response.context["banner"] == "Puff may need a snack soon."
-    assert response.context["status"] == "Puff could use a snack."
+    assert response.context["banner"] == "Puff needs rest."
+    assert "Care Board: REST" in response.content.decode()
+    assert response.context["status"] == "Puff is exhausted."
+

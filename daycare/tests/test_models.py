@@ -1,6 +1,30 @@
 import pytest
 
-from daycare.models import Dragon
+from daycare.models import Dragon, care_recommendation
+
+
+def test_care_recommendation_feed_now():
+    assert care_recommendation(8, 5) == "FEED NOW"
+
+
+def test_care_recommendation_rest():
+    assert care_recommendation(3, 2) == "REST"
+
+
+def test_care_recommendation_offer_snack():
+    assert care_recommendation(6, 5) == "OFFER SNACK"
+
+
+def test_care_recommendation_all_clear():
+    assert care_recommendation(5, 5) == "ALL CLEAR"
+
+
+def test_care_recommendation_feed_now_beats_rest():
+    assert care_recommendation(9, 1) == "FEED NOW"
+
+
+def test_care_recommendation_rest_beats_offer_snack():
+    assert care_recommendation(7, 1) == "REST"
 
 
 @pytest.mark.django_db

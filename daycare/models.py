@@ -1,13 +1,17 @@
 from django.db import models
 
-
-
 STARVING = 8            
 SNACKING_HUNGER = 6    
 HUNGER = 5             
 LOW_ENERGY = 2         
 MIN_HUNGER = 0
 MAX_ENERGY = 10
+
+
+FEED_NOW = "FEED NOW"
+REST = "REST"
+OFFER_SNACK = "OFFER SNACK"
+ALL_CLEAR = "ALL CLEAR"
 
 
 def is_starving(hunger):
@@ -22,6 +26,17 @@ def is_exhausted(energy):
     return energy <= LOW_ENERGY
 
 
+def care_recommendation(hunger, energy):
+    # Checked in priority order: the first rule that matches wins.
+    if is_starving(hunger):
+        return FEED_NOW
+    if is_exhausted(energy):
+        return REST
+    if is_snacking_hungry(hunger):
+        return OFFER_SNACK
+    return ALL_CLEAR
+
+
 class Dragon(models.Model):
     name = models.CharField(max_length=50, default="Puff")
     hunger = models.IntegerField(default=5)
@@ -29,7 +44,6 @@ class Dragon(models.Model):
     mood = models.CharField(max_length=20, default="content")
 
     def feed(self):
-        # This works, but the care rules have become tangled together.
         if is_starving(self.hunger):
             self.hunger -= 3
             self.energy += 1
@@ -46,13 +60,17 @@ class Dragon(models.Model):
         if self.energy > MAX_ENERGY:
             self.energy = MAX_ENERGY
 
+    def recommendation(self):
+        return care_recommendation(self.hunger, self.energy)
+
     def status_message(self):
-        if is_starving(self.hunger):
+        recommendation = self.recommendation()
+        if recommendation == FEED_NOW:
             return f"{self.name} is very hungry!"
-        if is_snacking_hungry(self.hunger):
-            return f"{self.name} could use a snack."
-        if is_exhausted(self.energy):
+        if recommendation == REST:
             return f"{self.name} is exhausted."
+        if recommendation == OFFER_SNACK:
+            return f"{self.name} could use a snack."
         if self.mood == "happy":
             return f"{self.name} is happy."
         if self.mood == "relieved":
@@ -65,5 +83,6 @@ class Dragon(models.Model):
         return (
             is_starving(self.hunger) or is_exhausted(self.energy) or self.mood == "sleepy"
         )
+
     def __str__(self):
         return self.name
